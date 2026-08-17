@@ -1,0 +1,20 @@
+{
+  "name": "teachback-ai-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TeachBack AI - core evaluation engine (no UI). Topic + rubric + student explanation -> structured knowledge evaluation.",
+  "type": "module",
+  "scripts": {
+    "server": "tsx server.ts",
+    "test:suite": "tsx test/runSuite.ts",
+    "test:consistency": "tsx test/runConsistency.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.7.4"
+  }
+}
