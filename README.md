@@ -11,8 +11,13 @@ on top of it.
 ```bash
 npm install
 cp .env.example .env
-# put ONE key in .env: OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY
+# put ONE key in .env: FEATHERLESS_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY
 ```
+
+Built for Pixel Forge AI Hackathon: Featherless (sponsor) gives 1 month of API access free via
+promo code `PIXELFORGE26` at featherless.ai — sign up, create an API key under Account > API
+Keys, put it in `FEATHERLESS_API_KEY`. It's OpenAI-compatible with 40,000+ open models; default
+here is `deepseek-ai/DeepSeek-V3.2`, override with `FEATHERLESS_MODEL`.
 
 ## Run the API
 

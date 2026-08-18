@@ -1,4 +1,4 @@
-export type Provider = "openai" | "anthropic" | "gemini";
+export type Provider = "openai" | "anthropic" | "gemini" | "featherless";
 
 function resolveProvider(): Provider {
   const explicit = process.env.LLM_PROVIDER as Provider | undefined;
@@ -6,8 +6,9 @@ function resolveProvider(): Provider {
   if (process.env.OPENAI_API_KEY) return "openai";
   if (process.env.ANTHROPIC_API_KEY) return "anthropic";
   if (process.env.GEMINI_API_KEY) return "gemini";
+  if (process.env.FEATHERLESS_API_KEY) return "featherless";
   throw new Error(
-    "No LLM API key found. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY (and optionally LLM_PROVIDER)."
+    "No LLM API key found. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or FEATHERLESS_API_KEY (and optionally LLM_PROVIDER)."
   );
 }
 
@@ -93,6 +94,38 @@ async function callGemini(system: string, user: string): Promise<string> {
   return data.candidates[0].content.parts[0].text;
 }
 
+async function callFeatherless(system: string, user: string): Promise<string> {
+  const apiKey = process.env.FEATHERLESS_API_KEY;
+  if (!apiKey) throw new Error("FEATHERLESS_API_KEY is not set.");
+  // Sponsor-provided endpoint for this hackathon (see Featherless Hackathon Setup Guide).
+  // OpenAI-compatible, but the open-source models behind it don't reliably support
+  // response_format json_object, so we omit it and rely on evaluate.ts's fence-stripping
+  // and one-retry validation instead.
+  const model = process.env.FEATHERLESS_MODEL || "deepseek-ai/DeepSeek-V3.2";
+
+  const res = await fetch("https://api.featherless.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Featherless request failed: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
 /** Calls the configured LLM provider and returns the raw text response (expected to be JSON). */
 export async function callLLM(system: string, user: string): Promise<string> {
   const provider = resolveProvider();
@@ -103,5 +136,7 @@ export async function callLLM(system: string, user: string): Promise<string> {
       return callAnthropic(system, user);
     case "gemini":
       return callGemini(system, user);
+    case "featherless":
+      return callFeatherless(system, user);
   }
 }
